@@ -21,25 +21,25 @@ typedef struct {
     queue *decimal;
 } infDec;
 
-// infDec add(infDec *a, infDec *b)
-// {
-//     queue *a_int = a->integer, *b_int = b->integer,
-//           *a_dec = a->decimal, *b_dec = b->decimal,
-//           *res_int, *res_dec;
+infDec add(infDec *a, infDec *b)
+{
+    queue *a_int = a->integer, *b_int = b->integer,
+          *a_dec = a->decimal, *b_dec = b->decimal,
+          *res_int, *res_dec;
 
-//     node *a_int_tmp = a_int->rightMost, *b_int_tmp = b_int->rightMost,
-//          *res_int_tmp = res_int->rightMost;
+    node *a_int_tmp = a_int->rightMost, *b_int_tmp = b_int->rightMost,
+         *res_int_tmp = res_int->rightMost;
 
-//     for (int cnt = 0; cnt < min(a_int->size, b_int->size); cnt++) {
-//         res_int_tmp->value += a_int_tmp->value + b_int_tmp->value;
-//         if (res_int_tmp->value >= 10) {
-//             res_int_tmp->value -= 10;
-//             res_int_tmp->left->value += 1;
-//         }
-//     }
-//     infDec res_infDec = {res_int, res_dec};
-//     return res_infDec;
-// }
+    for (int cnt = 0; cnt < min(a_int->size, b_int->size); cnt++) {
+        res_int_tmp->value += a_int_tmp->value + b_int_tmp->value;
+        if (res_int_tmp->value >= 10) {
+            res_int_tmp->value -= 10;
+            res_int_tmp->left->value += 1;
+        }
+    }
+    infDec res_infDec = {res_int, res_dec};
+    return res_infDec;
+}
 
 void printNode(node *n)
 {
@@ -55,21 +55,28 @@ void printQueue(queue *q)
 
 queue addInt(queue *a, queue *b)
 {
-    queue res;
+    queue res = {.leftMost = NULL, .rightMost = NULL, .size = 0};
 
     node *a_tmp = a->rightMost, *b_tmp = b->rightMost,
          *res_tmp = (&res)->rightMost;
 
+    node dummyNode = {NULL, NULL, -1};
+
     printNode(a_tmp);
     printNode(b_tmp);
-    printNode(res_tmp);
+    // printNode(res_tmp);
 
     for (int cnt = 0; cnt < min(a->size, b->size); cnt++) {
-        res_tmp->value += a_tmp->value + b_tmp->value;
-        printf("%d", res_tmp->value);
-        if (res_tmp->value >= 10) {
-            res_tmp->value -= 10;
-            res_tmp->left->value += 1;
+        int v = a_tmp->value + b_tmp->value;
+        printf("%d", v);
+        if (v >= 10) {
+            v -= 10;
+            node tmp = {.left = &dummyNode, .right = &dummyNode, .value = v};
+            node tmp_left = {.left = &dummyNode, .right = &dummyNode, .value = 1};
+            tmp.left = &tmp_left;
+            res_tmp = &tmp;
+        } else {
+
         }
     }
     return res;
@@ -83,7 +90,7 @@ void printInfiniteDecimal(infDec *infDec)
         intTmp = intTmp->right;
     }
     
-    printf(".");
+    printf(".\n");
 
     node *decTmp = infDec->decimal->leftMost;
     for (int i = 0; i < infDec->decimal->size; i++) {
@@ -101,15 +108,20 @@ int main(void)
     node a2 = {.left = &a1, .right = &dummyNode, .value = 2};
     a1.right = &a2;
     queue qa = {.leftMost = &a1, .rightMost = &a2, .size = 2};
-    // infDec a = {.integer = &qa, .decimal = NULL};
+    infDec a = {.integer = &qa, .decimal = NULL};
+    printInfiniteDecimal(&a);
 
     node b1 = {.left = &dummyNode, .right = &dummyNode, .value = 1};
     node b2 = {.left = &b1, .right = &dummyNode, .value = 2};
     b1.right = &b2;
     node b3 = {.left = &b2, .right = &dummyNode, .value = 3};
-    b3.right = &b2;
-    queue qb = {.leftMost = &b1, .rightMost = &b3};
-    // infDec b = {.integer = &qb, .decimal = NULL};
+    b2.right = &b3;
+    queue qb = {.leftMost = &b1, .rightMost = &b3, .size = 3};
+    infDec b = {.integer = &qb, .decimal = NULL};
+    // printNode(&b1);
+    // printNode(&b2);
+    // printNode(&b3);
+    printInfiniteDecimal(&b);
 
     queue result = addInt(&qa, &qb);
     infDec c = {.integer = &result, .decimal = NULL};
