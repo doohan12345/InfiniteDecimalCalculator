@@ -1,0 +1,59 @@
+int parseString(const char *expression, Token *tokens) {
+    int length = strlen(expression);
+    int tokenIndex = 0;
+    int i = 0;
+
+    while (i < length) {
+        if (isdigit(expression[i]) || (expression[i] == '-' && isdigit(expression[i + 1]))) {
+            // 숫자인 경우 (피연산자)
+            int start = i;
+            while (isdigit(expression[i]) || expression[i] == '.') {
+                i++;
+            }
+            int end = i;
+
+            // 토큰 값 할당 및 타입 설정
+            tokens[tokenIndex].value = (char *)malloc(end - start + 1);
+            strncpy(tokens[tokenIndex].value, expression + start, end - start);
+            tokens[tokenIndex].value[end - start] = '\0';
+            tokens[tokenIndex].type = OPERAND;
+            tokenIndex++;
+        } else if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/') {
+            // 연산자인 경우
+            tokens[tokenIndex].value = (char *)malloc(2);
+            tokens[tokenIndex].value[0] = expression[i];
+            tokens[tokenIndex].value[1] = '\0';
+            tokens[tokenIndex].type = OPERATOR;
+            tokenIndex++;
+            i++;
+        } else if (expression[i] == '(') {
+            // 열린 괄호인 경우
+            tokens[tokenIndex].value = (char *)malloc(2);
+            tokens[tokenIndex].value[0] = '(';
+            tokens[tokenIndex].value[1] = '\0';
+            tokens[tokenIndex].type = OPEN_PAREN;
+            tokenIndex++;
+            i++;
+        } else if (expression[i] == ')') {
+            // 닫힌 괄호인 경우
+            tokens[tokenIndex].value = (char *)malloc(2);
+            tokens[tokenIndex].value[0] = ')';
+            tokens[tokenIndex].value[1] = '\0';
+            tokens[tokenIndex].type = CLOSE_PAREN;
+            tokenIndex++;
+            i++;
+        } else if (isspace(expression[i])) {
+            // 공백 문자는 무시
+            i++;
+        } else {
+            // 유효하지 않은 문자인 경우
+            printf("Error: 표현식에 잘못된 문자 '%c'가 포함되어 있습니다.\n", expression[i]);
+            return 0; // 실패 시 0 반환
+        }
+    }
+
+    tokens[tokenIndex].value = NULL;
+    tokens[tokenIndex].type = END;
+
+    return 1;
+}
